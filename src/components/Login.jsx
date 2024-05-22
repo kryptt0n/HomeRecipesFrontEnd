@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -10,6 +11,7 @@ export default function Login() {
     const [showSuccessMesage, setSuccessMesage] = useState(false);
     const [showErrorMesage, setErrorMesage] = useState(false);
     const authContext = useAuth();
+    const navigate = useNavigate();
 
     function onPasswordChange(event) {
         setPassword(event.target.value);
@@ -19,8 +21,17 @@ export default function Login() {
         setUsername(event.target.value);
     }
 
-    function handleSubmit(event) {
-        authContext.login(username, password);
+    async function handleSubmit(event) {
+        const successfulLogin = await authContext.login(username, password);
+        const token = authContext.token;
+        console.log(token);
+        if (successfulLogin) {
+            setSuccessMesage(true);
+            console.log(authContext)
+            navigate("/recipes")
+        } else {
+            setErrorMesage(true);
+        }
     }
 
     return (
