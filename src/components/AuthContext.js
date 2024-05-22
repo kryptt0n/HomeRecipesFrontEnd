@@ -23,6 +23,7 @@ export default function AuthProvider({children}) {
         if (result.status == 200) {
             setAuthenticated(true)
             setToken(userToken)
+            setUsername(username)
             apiClient.interceptors.request.use((config) => {
                 console.log(token)
               

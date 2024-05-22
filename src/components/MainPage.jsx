@@ -4,6 +4,7 @@ import Error from './Error'
 import ListDishes from './ListDishes'
 import Login from './Login'
 import AuthProvider from './AuthContext'
+import ListUserDishes from './ListUserDishes'
 
 export default function MainPage() {
     return (
@@ -14,8 +15,9 @@ export default function MainPage() {
                     <Route path='/' element={ <ListDishes /> } />
                     <Route path='/login' element={ <Login /> } />
                     <Route path='/recipes' element={ <ListDishes /> } />
+                    <Route path='/myrecipes' element={ <ListUserDishes /> } />
 
-    {/* path='/todo/:id'         */}
+    {/* path='/recipe/:id'         */}
                     <Route path='*' element={<Error /> } />
                 </Routes>
             </BrowserRouter>
