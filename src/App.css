@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.LoginForm {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  align-content: space-between;
+  gap: 20px;
+}

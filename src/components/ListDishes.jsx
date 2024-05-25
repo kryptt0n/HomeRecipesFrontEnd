@@ -12,7 +12,6 @@ export default function ListDishes() {
     function getDishes() {
         retrieveDishes()
         .then((dishes) => {
-            console.log(dishes.data)
             setDishes(dishes.data)
         })
         .catch((error)=>{
@@ -55,7 +54,6 @@ export default function ListDishes() {
 
                 </table>
             </div>
-            <div className="btn btn-success m-5" onClick={getDishes}>New Dish</div>
         </div>
     )
 }

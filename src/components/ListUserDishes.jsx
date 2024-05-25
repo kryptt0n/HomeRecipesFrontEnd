@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react"
-import { retrieveDishes, retrieveUserDishes } from "./api/DishesService";
+import { deleteDishApi, retrieveDishes, retrieveUserDishes } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ListUserDishes() {
 
     const [dishes, setDishes] = useState([]);
     const auth = useAuth();
     const username = auth.username;
+    const navigate = useNavigate();
 
     useEffect(getDishes, [dishes]);
 
     function getDishes() {
         retrieveUserDishes(username)
         .then((dishes) => {
-            console.log(dishes.data)
             setDishes(dishes.data)
         })
         .catch((error)=>{
@@ -21,6 +22,22 @@ export default function ListUserDishes() {
             setDishes([])
         }
         )
+    }
+
+    function deleteDish(id) {
+        deleteDishApi(id)
+        .then((res) => {
+            console.log(res);
+            retrieveDishes();
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+
+    function updateDish(id) {
+        navigate(`/recipes/${id}`)
+        retrieveDishes();
     }
 
     return (
@@ -44,10 +61,10 @@ export default function ListUserDishes() {
                                     <td>{dish.cookingTime}</td>
                                     <td>{dish.servings}</td>
                                     <td>{dish.rating}</td>
-                                    {/* <td> <button className="btn btn-warning" 
-                                                    onClick={() => deleteTodo(todo.id)}>Delete</button> </td>
+                                    <td> <button className="btn btn-warning" 
+                                                    onClick={() => deleteDish(dish.id)}>Delete</button> </td>
                                     <td> <button className="btn btn-success" 
-                                                    onClick={() => updateTodo(todo.id)}>Update</button> </td> */}
+                                                    onClick={() => updateDish(dish.id)}>Update</button> </td>
                                 </tr>
                             )
                         )

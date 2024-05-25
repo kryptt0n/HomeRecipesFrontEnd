@@ -19,10 +19,6 @@ export default function Header() {
                             <ul className="navbar-nav">
                                 <li className="nav-item fs-5">
                                     {isAuth && 
-                                        <Link className="nav-link" to="/welcome/vitaly">Home</Link>}
-                                </li>
-                                <li className="nav-item fs-5">
-                                    {isAuth && 
                                         <Link className="nav-link" to="/recipes">Recipes</Link>}
                                 </li>
                             </ul>

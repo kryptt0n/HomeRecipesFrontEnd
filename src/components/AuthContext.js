@@ -25,14 +25,9 @@ export default function AuthProvider({children}) {
             setToken(userToken)
             setUsername(username)
             apiClient.interceptors.request.use((config) => {
-                console.log(token)
-              
                 config.headers['Authorization'] = userToken;
-                console.log(config.headers);
-              
               return config;
             });
-            console.log({isAuthenticated, token});
             return true;
         } else {
             return false
@@ -45,7 +40,7 @@ export default function AuthProvider({children}) {
     }
 
     return (
-        <AuthContext.Provider value={{isAuthenticated, username, token, login}}>
+        <AuthContext.Provider value={{isAuthenticated, username, token, login, logout}}>
             {children}
         </AuthContext.Provider>
     )
