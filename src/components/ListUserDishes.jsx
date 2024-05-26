@@ -40,6 +40,11 @@ export default function ListUserDishes() {
         retrieveDishes();
     }
 
+    function addDish() {
+        navigate(`/recipes/-1`)
+        retrieveDishes();
+    }
+
     return (
         <div>
             <div>
@@ -58,7 +63,7 @@ export default function ListUserDishes() {
                             dish => (
                                 <tr key={dish.id}>
                                     <td>{dish.name}</td>
-                                    <td>{dish.cookingTime}</td>
+                                    <td>{dish.cookingTime} min</td>
                                     <td>{dish.servings}</td>
                                     <td>{dish.rating}</td>
                                     <td> <button className="btn btn-warning" 
@@ -73,7 +78,7 @@ export default function ListUserDishes() {
 
                 </table>
             </div>
-            <div className="btn btn-success m-5" onClick={getDishes}>New Dish</div>
+            <div className="btn btn-success m-5" onClick={addDish}>New Dish</div>
         </div>
     )
 }

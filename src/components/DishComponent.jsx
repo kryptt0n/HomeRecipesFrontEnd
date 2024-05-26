@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react"
-import { retrieveDishById, retrieveDishes, updateDishApi } from "./api/DishesService";
+import { addDishApi, retrieveDishById, retrieveDishes, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik, useFormik } from "formik";
 
 export default function DishComponent() {
 
     const [dish, setDish] = useState({});
     const auth = useAuth();
+    const username = auth.username;
+    const [user, setUser] = useState({})
     const {id} = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {retrieveDish(id)}, [dish])
+    useEffect(() => {retrieveUser()}, [user])
 
     const validate = values => {
         const errors = {};
@@ -24,13 +28,14 @@ export default function DishComponent() {
 
         if (!values.cookingTime) {
             errors.cookingTime = 'Required'
-        } else if (parseInt(values.cookingTime)) {
+        } else if (!parseInt(values.cookingTime)) {
             errors.cookingTime = 'Should be a number';
         }
 
+
         if (!values.servings) {
             errors.servings = 'Required'
-        } else if (parseInt(values.servings)) {
+        } else if (!parseInt(values.servings)) {
             errors.servings = 'Should be a number';
         }
 
@@ -38,21 +43,49 @@ export default function DishComponent() {
     }
 
     function updateDish(dishData) {
-    dishData.id = dish.id;
-    dishData.rating = dish.rating;
-    dishData.user = dish.user;
-    console.log(dishData);
+        dishData.rating = dish.rating;
+        dishData.user = user;
+        
+        if (id != -1) {
+            dishData.id = dish.id;
+            updateDishApi(dishData)
+            .then(response => {
+                navigate("/myrecipes");
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        } else {
+            addDishApi(dishData)
+            .then(response => {
+                navigate("/myrecipes");
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        }
     }
    
-    
-    function retrieveDish(id) {
-        retrieveDishById(id)
-        .then(dish => {
-            setDish(dish.data);
+    function retrieveUser() {
+        retrieveUserByUsernameApi(username)
+        .then(response => {
+            setUser(response.data);
         })
         .catch(error => {
             console.log(error);
         })
+    }
+    
+    function retrieveDish(id) {
+        if (id != -1) {
+            retrieveDishById(id)
+            .then(dish => {
+                setDish(dish.data);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        }
     }
 
 
@@ -62,6 +95,7 @@ export default function DishComponent() {
             cookingTime: dish.cookingTime,
             servings: dish.servings,
         }}
+        enableReinitialize = {true}
         validate={validate}
         validateOnChange={false}
         onSubmit={(values) => updateDish(values)}
@@ -86,7 +120,7 @@ export default function DishComponent() {
                         <ErrorMessage name="servings" render={msg => <div className="text-danger">{msg}</div>}/>
                     </fieldset>
 
-                    <button type="submit">Submit</button>
+                    <button type="submit">Save</button>
                 </div>
             </Form>
            

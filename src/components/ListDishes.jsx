@@ -39,7 +39,7 @@ export default function ListDishes() {
                             dish => (
                                 <tr key={dish.id}>
                                     <td>{dish.name}</td>
-                                    <td>{dish.cookingTime}</td>
+                                    <td>{dish.cookingTime} min</td>
                                     <td>{dish.servings}</td>
                                     <td>{dish.rating}</td>
                                     {/* <td> <button className="btn btn-warning" 

@@ -17,5 +17,13 @@ export function deleteDishApi(id) {
 }
 
 export function updateDishApi(dish) {
+    return apiClient.put(`/dishes`, dish);
+}
+
+export function addDishApi(dish) {
     return apiClient.post(`/dishes`, dish);
+}
+
+export function retrieveUserByUsernameApi(username) {
+    return apiClient.get(`/users/${username}`);
 }
