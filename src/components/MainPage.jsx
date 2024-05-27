@@ -7,6 +7,7 @@ import AuthProvider from './AuthContext'
 import ListUserDishes from './ListUserDishes'
 import Logout from './Logout'
 import DishComponent from './DishComponent'
+import SignUp from './SignUp'
 
 export default function MainPage() {
     return (
@@ -19,6 +20,7 @@ export default function MainPage() {
                     <Route path='/recipes' element={ <ListDishes /> } />
                     <Route path='/myrecipes' element={ <ListUserDishes /> } />
                     <Route path='/logout' element={ <Logout /> } />
+                    <Route path='/signup' element={ <SignUp /> } />
                     <Route path='/recipes/:id' element={ <DishComponent /> } />
                     <Route path='*' element={<Error /> } />
                 </Routes>
