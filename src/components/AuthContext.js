@@ -15,28 +15,49 @@ export default function AuthProvider({children}) {
 
     const [token, setToken] = useState(null)
 
-    async function login(username, password) {
-        const userToken = "Basic " + btoa(username + ":" + password);
-        console.log(userToken);
-        const result = await authenticate(userToken);
-        console.log(result)
-        if (result.status == 200) {
-            setAuthenticated(true)
-            setToken(userToken)
-            setUsername(username)
-            apiClient.interceptors.request.use((config) => {
-                config.headers['Authorization'] = userToken;
-              return config;
-            });
-            return true;
-        } else {
-            return false
+    const [interceptorId, setInterceptorId] = useState(undefined);
+
+    async function login(user, pwd) {
+        const userToken = "Basic " + btoa(user + ":" + pwd);
+        try {
+            const result = await authenticate(userToken);
+            if (result.status == 200) {
+                setAuthenticated(true);
+                setToken(userToken);
+                setUsername(user);
+                addAuthInterceptor(userToken);
+                return true;
+            } else {
+                return false
+            }
+        } catch {
+            logout()
+            return false;
         }
     }
 
     function logout() {
-        setAuthenticated(false)
-        setToken(null)
+        setAuthenticated(false);
+        setToken(null);
+        setUsername(null);
+        removeAuthInterceptor();
+    }
+
+    function addAuthInterceptor(userToken) {
+        removeAuthInterceptor();
+        setInterceptorId(
+            apiClient.interceptors.request.use((config) => {
+            config.headers['Authorization'] = userToken;
+            return config;
+        })
+        );
+    }
+
+    function removeAuthInterceptor() {
+        if (interceptorId !== undefined) {
+            apiClient.interceptors.request.eject(interceptorId);
+            setInterceptorId(undefined);
+        }
     }
 
     return (

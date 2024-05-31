@@ -25,6 +25,7 @@ export default function Login() {
         const successfulLogin = await authContext.login(username, password);
         const token = authContext.token;
         console.log(token);
+        console.log(successfulLogin);
         if (successfulLogin) {
             setSuccessMesage(true);
             console.log(authContext)
