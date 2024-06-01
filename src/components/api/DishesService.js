@@ -27,3 +27,7 @@ export function addDishApi(dish) {
 export function retrieveUserByUsernameApi(username) {
     return apiClient.get(`/users/${username}`);
 }
+
+export function retrieveProductsForDish(id) {
+    return apiClient.get(`/dishes/${id}/products`);
+}

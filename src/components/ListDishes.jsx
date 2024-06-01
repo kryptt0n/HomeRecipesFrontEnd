@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { retrieveDishes } from "./api/DishesService";
+import { retrieveDishes, retrieveProductsForDish } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 
 export default function ListDishes() {
@@ -17,6 +17,17 @@ export default function ListDishes() {
         .catch((error)=>{
             console.log(error)
             setDishes([])
+        }
+        )
+    }
+
+    function getProducts(id) {
+        retrieveProductsForDish(id)
+        .then((products) => {
+            console.log(products.data)
+        })
+        .catch((error)=>{
+            console.log(error)
         }
         )
     }
@@ -42,10 +53,8 @@ export default function ListDishes() {
                                     <td>{dish.cookingTime} min</td>
                                     <td>{dish.servings}</td>
                                     <td>{dish.rating}</td>
-                                    {/* <td> <button className="btn btn-warning" 
-                                                    onClick={() => deleteTodo(todo.id)}>Delete</button> </td>
-                                    <td> <button className="btn btn-success" 
-                                                    onClick={() => updateTodo(todo.id)}>Update</button> </td> */}
+                                    <td> <button className="btn btn-warning" 
+                                                    onClick={() => getProducts(dish.id)}>Get products</button> </td>
                                 </tr>
                             )
                         )

@@ -41,8 +41,10 @@ export default function SignUp() {
 
     async function signUpUser(credentials) {
         credentials.password = await encodeSHA256(credentials.password);
+        credentials.enabled = true;
         createUserApi(credentials)
         .then(response => {
+            console.log(response);
             navigate("/login");
         })
         .catch(error => {
