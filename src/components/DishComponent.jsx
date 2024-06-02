@@ -21,7 +21,7 @@ export default function DishComponent() {
         }
     });
 
-    const { fields, append } = useFieldArray({
+    const { fields, append, remove } = useFieldArray({
         control,
         name: "products"
     });
@@ -88,6 +88,12 @@ export default function DishComponent() {
         }
     }
 
+    function removeProduct(index) {
+        if (index) {
+            remove(index);
+        }
+    }
+
     const onValid = (data) => {
         onSubmit(data);
     };
@@ -129,6 +135,7 @@ export default function DishComponent() {
                     {fields.map((product, index) => (
                         <li className="list-group-item">
                             <input key={product.id} {...register((`products.${index}.value`))} value={product.name} />
+                            <button type="button" className="btn btn-danger btn-sm" onClick={() => removeProduct(index)}>-</button>
                         </li>
                     ))}
                     <li className="list-group-item mb-4">
