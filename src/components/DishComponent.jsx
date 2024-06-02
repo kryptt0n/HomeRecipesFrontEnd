@@ -1,218 +1,143 @@
-import { useEffect, useState } from "react"
-import { addDishApi, retrieveDishById, retrieveDishes, retrieveProductsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
+import { useEffect, useState } from "react";
+import { addDishApi, retrieveDishById, retrieveProductsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { ErrorMessage, Field, Form, Formik, useFormik, useFormikContext } from "formik";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 
 export default function DishComponent() {
-
     const [dish, setDish] = useState({});
-    const [products, setProducts] = useState([]);
+    const [user, setUser] = useState({});
     const auth = useAuth();
     const username = auth.username;
-    const [user, setUser] = useState({})
-    const {id} = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
-    const {register, handleSubmit, formState: {errors}} = useForm({defaultValues: {
-        name: dish.name,
-        cookingTime: dish.cookingTime,
-        servings: dish.servings,
-        products: products
-    }});
-    const onSubmit = (data) => updateDish(data)
 
-
-    useEffect(() => {retrieveDish(id)}, [dish])
-    useEffect(retrieveUser, [user])
-    useEffect(() => {retrieveProducts(id)}, [products])
-
-    const validate = values => {
-        const errors = {};
-        if (!values.name) {
-            errors.name = 'Required'
-        } else if (values.name.length < 2) {
-            errors.name = 'Should be atleast 2 characters';
-        } else if (values.name.length > 100) {
-            errors.name = 'Should be maximum 100 characters';
+    const { register, handleSubmit, setValue, control, formState: { errors } } = useForm({
+        defaultValues: {
+            name: "",
+            cookingTime: "",
+            servings: "",
+            products: []
         }
+    });
 
-        if (!values.cookingTime) {
-            errors.cookingTime = 'Required'
-        } else if (!parseInt(values.cookingTime)) {
-            errors.cookingTime = 'Should be a number';
+    const { fields, append } = useFieldArray({
+        control,
+        name: "products"
+    });
+
+    useEffect(() => {
+        if (id !== "-1") {
+            retrieveDish(id);
+            retrieveProducts(id);
         }
+    }, [id]);
 
+    useEffect(() => {
+        retrieveUser();
+    }, [username]);
 
-        if (!values.servings) {
-            errors.servings = 'Required'
-        } else if (!parseInt(values.servings)) {
-            errors.servings = 'Should be a number';
+    useEffect(() => {
+        if (dish) {
+            setValue("name", dish.name);
+            setValue("cookingTime", dish.cookingTime);
+            setValue("servings", dish.servings);
+            setValue("products", dish.products || []);
         }
-
-        return errors
-    }
+    }, [dish, setValue, append]);
 
     function updateDish(dishData) {
         dishData.rating = dish.rating;
         dishData.user = user;
-        
-        if (id != -1) {
+        if (id !== "-1") {
             dishData.id = dish.id;
             updateDishApi(dishData)
-            .then(response => {
-                navigate("/myrecipes");
-            })
-            .catch(error => {
-                console.log(error);
-            })
+                .then(response => navigate("/myrecipes"))
+                .catch(error => console.log(error));
         } else {
             addDishApi(dishData)
-            .then(response => {
-                navigate("/myrecipes");
-            })
-            .catch(error => {
-                console.log(error);
-            })
+                .then(response => navigate("/myrecipes"))
+                .catch(error => console.log(error));
         }
     }
-   
+
     function retrieveUser() {
         retrieveUserByUsernameApi(username)
-        .then(response => {
-            setUser(response.data);
-        })
-        .catch(error => {
-            console.log(error);
-        })
+            .then(response => setUser(response.data))
+            .catch(error => console.log(error));
     }
-    
+
     function retrieveDish(id) {
-        if (id != -1) {
-            retrieveDishById(id)
-            .then(dish => {
-                setDish(dish.data);
-            })
-            .catch(error => {
-                console.log(error);
-            })
-        }
+        retrieveDishById(id)
+            .then(responseDish => setDish(responseDish.data))
+            .catch(error => console.log(error));
     }
 
     function retrieveProducts(id) {
         retrieveProductsForDish(id)
-        .then((products) => {
-            console.log(products.data)
-        })
-        .catch((error)=>{
-            console.log(error)
-        }
-        )
+            .then(response => {
+                setValue("products", response.data);
+            })
+            .catch(error => console.log(error));
     }
 
-    function addProduct(productname) {
-        setProducts(products.concat(productname))
-        console.log(products);
+    function addProduct(productName) {
+        if (productName) {
+            append({ name: productName });
+            document.getElementById('newProductName').value = "";
+        }
     }
 
     const onValid = (data) => {
         onSubmit(data);
-      };
+    };
+
+    const onSubmit = (data) => {
+        updateDish(data);
+    };
 
     return (
         <div className="d-flex flex-sm-column justify-content-center align-items-center gap-2">
             <form onSubmit={handleSubmit(onValid)}>
+                <h3>Description</h3>
                 <fieldset className="form-group row">
-                    <label htmlFor="name" className="col-sm-2 col-form-label">Name</label>
-                    <div class="col-sm-10">
-                        <input {...register("name", {required: "Name is required"})} type="text" />
+                    <label htmlFor="name" className="col-md-5 col-form-label">Name</label>
+                    <div className="col-sm-5">
+                        <input {...register("name", { required: "Name is required" })} type="text" />
                     </div>
-                    <small id="namewarning" class="form-text text-danger">{errors.name?.message}</small>
+                    <small id="namewarning" className="form-text text-danger">{errors.name?.message}</small>
                 </fieldset>
 
                 <fieldset className="form-group row">
-                    <label htmlFor="cookingTime" className="col-sm-2 col-form-label">Cooking time</label>
-                    <div class="col-sm-10">
-                        <input {...register("cookingTime", {required: "Cooking time is required"})} type="number" />
+                    <label htmlFor="cookingTime" className="col-md-5 col-form-label">Cooking time</label>
+                    <div className="col-sm-5">
+                        <input {...register("cookingTime", { required: "Cooking time is required" })} type="number" />
                     </div>
-                    <small id="cookingtimewarning" class="form-text text-danger">{errors.cookingTime?.message}</small>
+                    <small id="cookingtimewarning" className="form-text text-danger">{errors.cookingTime?.message}</small>
                 </fieldset>
 
-                <fieldset className="form-group row">
-                    <label htmlFor="servings" className="col-sm-2 col-form-label">Servings</label>
-                    <div class="col-sm-10">
-                        <input {...register("servings", {required: "Servings are required"})} type="number" />
+                <fieldset className="form-group row mb-5">
+                    <label htmlFor="servings" className="col-md-5 col-form-label mr-9">Servings</label>
+                    <div className="col-sm-5">
+                        <input {...register("servings", { required: "Servings are required" })} type="number" />
                     </div>
-                    <small id="servingswarning" class="form-text text-danger">{errors.servings?.message}</small>
+                    <small id="servingswarning" className="form-text text-danger">{errors.servings?.message}</small>
                 </fieldset>
 
-                <button type="submit">Save</button>
+                <h3>Products</h3>
+                <ul className="list-group list-group-flush">
+                    {fields.map((product, index) => (
+                        <li className="list-group-item">
+                            <input key={product.id} {...register((`products.${index}.value`))} value={product.name} />
+                        </li>
+                    ))}
+                    <li className="list-group-item mb-4">
+                        <input type="text" id="newProductName" />
+                        <button type="button" onClick={() => addProduct(document.getElementById('newProductName').value)}>+</button>
+                    </li>
+                </ul>
+                <button type="submit" className="btn btn-success">Save</button>
             </form>
         </div>
-    )
-
-
-    return (
-        <Formik initialValues={{
-            name: dish.name,
-            cookingTime: dish.cookingTime,
-            servings: dish.servings,
-            productname: ""
-        }}
-        enableReinitialize = {true}
-        validate={validate}
-        validateOnChange={false}
-        onSubmit={(values) => updateDish(values)}
-        >
-            {props => (
-                <Form>
-                    <div className="d-flex flex-sm-column justify-content-center align-items-center gap-2">
-                        <fieldset>
-                            <label htmlFor="name">Name</label>
-                            <Field name="name" type="text" />
-                            <ErrorMessage name="name" render={msg => <div className="text-danger">{msg}</div>}/>
-                        </fieldset>
-
-                        <fieldset>
-                            <label htmlFor="cookingTime">Cooking time</label>
-                            <Field name="cookingTime" type="number" />
-                            <ErrorMessage name="cookingTime" render={msg => <div className="text-danger">{msg}</div>}/>
-                        </fieldset>
-
-                        <fieldset>
-                            <label htmlFor="servings">Servings</label>
-                            <Field name="servings" type="number" />
-                            <ErrorMessage name="servings" render={msg => <div className="text-danger">{msg}</div>}/>
-                        </fieldset>
-
-                        <button type="submit">Save</button>
-                    </div>
-
-                    <h2>Products</h2>
-                    <table>
-                        <thead>
-                            <tr>Name</tr>
-                        </thead>
-                        <tbody>
-                            {
-                                products.map(
-                                    product => {
-                                        <tr key={product.id}>
-                                            <td>{product.name}</td>
-                                        </tr>
-                                    }
-                                )
-                            }
-                            <tr>
-                                <td>
-                                    <Field name="productname" type="text" />
-                                </td>
-                                <td><button type="button" className="btn btn-primary" onClick={() => {addProduct(props.values.productname)}}>+</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </Form>
-            )}
-        </Formik>
-    )
+    );
 }
