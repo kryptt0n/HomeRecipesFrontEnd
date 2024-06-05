@@ -17,6 +17,8 @@ export default function DishComponent() {
             name: "",
             cookingTime: "",
             servings: "",
+            description: "",
+            image: "",
             products: []
         }
     });
@@ -42,6 +44,7 @@ export default function DishComponent() {
             setValue("name", dish.name);
             setValue("cookingTime", dish.cookingTime);
             setValue("servings", dish.servings);
+            setValue("description", dish.description);
             setValue("products", dish.products || []);
         }
     }, [dish, setValue, append]);
@@ -55,8 +58,20 @@ export default function DishComponent() {
                 .then(response => navigate("/myrecipes"))
                 .catch(error => console.log(error));
         } else {
-            addDishApi(dishData)
-                .then(response => navigate("/myrecipes"))
+            const formData = new FormData();
+            formData.append('image', dishData.image[0]);
+            delete dishData.image;
+            dishData.products.map(
+                product => {
+                    delete product.value;
+                })
+            console.log(dishData);
+            formData.append('dish', JSON.stringify(dishData));
+            addDishApi(formData)
+                .then(response => {
+                    console.log(response.data);
+                    // navigate("/myrecipes")
+                })
                 .catch(error => console.log(error));
         }
     }
@@ -128,6 +143,22 @@ export default function DishComponent() {
                         <input {...register("servings", { required: "Servings are required" })} type="number" />
                     </div>
                     <small id="servingswarning" className="form-text text-danger">{errors.servings?.message}</small>
+                </fieldset>
+
+                <fieldset className="form-group row">
+                    <label htmlFor="description" className="col-md-5 col-form-label">Description</label>
+                    <div className="col-sm-5">
+                        <input {...register("description")} type="text" />
+                    </div>
+                    <small id="descriptionwarning" className="form-text text-danger">{errors.name?.message}</small>
+                </fieldset>
+
+                <fieldset className="form-group row">
+                    <label htmlFor="image" className="col-md-5 col-form-label">Image</label>
+                    <div className="col-sm-5">
+                        <input {...register("image", {required: "Image is required"})} type="file" />
+                    </div>
+                    <small id="imagewarning" className="form-text text-danger">{errors.image?.message}</small>
                 </fieldset>
 
                 <h3>Products</h3>

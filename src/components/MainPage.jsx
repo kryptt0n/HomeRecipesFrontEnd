@@ -43,9 +43,7 @@ export default function MainPage() {
                     <Route path='/signup' element={ <SignUp /> } />
 
                     <Route path='/recipes/:id' element={ 
-                        <AuthenticationRoute>
-                            <DishComponent /> 
-                        </AuthenticationRoute>
+                            <DishComponent />
                     } />
 
                     <Route path='*' element={<Error /> } />

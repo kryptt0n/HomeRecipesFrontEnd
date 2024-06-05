@@ -21,7 +21,11 @@ export function updateDishApi(dish) {
 }
 
 export function addDishApi(dish) {
-    return apiClient.post(`/dishes`, dish);
+    return apiClient.post(`/dishes`, dish, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
 }
 
 export function retrieveUserByUsernameApi(username) {
@@ -30,4 +34,10 @@ export function retrieveUserByUsernameApi(username) {
 
 export function retrieveProductsForDish(id) {
     return apiClient.get(`/dishes/${id}/products`);
+}
+
+export function retrieveImageForDish(id) {
+    return apiClient.get(`/dishes/${id}/image`, {
+        responseType: 'blob'
+    })
 }

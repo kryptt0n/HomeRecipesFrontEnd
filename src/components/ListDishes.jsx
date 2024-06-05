@@ -1,19 +1,33 @@
 import { useEffect, useState } from "react"
-import { retrieveDishes, retrieveProductsForDish } from "./api/DishesService";
+import { retrieveDishes, retrieveImageForDish, retrieveProductsForDish } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function ListDishes() {
 
     const [dishes, setDishes] = useState([]);
     const auth = useAuth();
     const username = auth.username;
+    const navigate = useNavigate();
 
     useEffect(getDishes, [username]);
 
     function getDishes() {
         retrieveDishes()
-        .then((foundDishes) => {
-            setDishes(foundDishes.data)
+        .then((response) => {
+            const foundDishes = response.data;
+            const fetchImages = foundDishes.map(dish => {
+                return retrieveImageForDish(dish.id)
+                    .then(imageResponse => {
+                        const imageUrl = URL.createObjectURL(imageResponse.data);
+                        console.log({ ...dish, imageUrl });
+                        return { ...dish, imageUrl };
+                    });
+            });
+            return Promise.all(fetchImages);
+        })
+        .then(dishesWithImages => {
+            setDishes(dishesWithImages);
         })
         .catch((error)=>{
             console.log(error)
@@ -33,6 +47,11 @@ export default function ListDishes() {
         )
     }
 
+    function navigateToDishPage(id) {
+        console.log(`/recipes/${id}`);
+        navigate(`/recipes/${id}`);
+    }
+
     return (
         <div className="card-group row-cols-1 row-cols-md-2 g-4">
             {dishes.map(
@@ -41,47 +60,13 @@ export default function ListDishes() {
                         <div className="card m-5 p-2 d-flex flex-row justify-content-between align-items-center">
                             <div className="card-body">
                                 <h5 className="card-title">{dish.name}</h5>
-                                <p className="card-text">Some description</p>
-                                <a href="#" className="btn btn-primary">Details</a>
-                            </div>
-                            <img src="..." className="card-img-top" alt="Dish photo" />
+                                <p className="card-text">{dish.description}</p>
+                                <button className="btn btn-primary" onClick={() => navigateToDishPage(dish.id)}>Details</button>
+                            </div>  
+                            <img src={dish.imageUrl} className="card-img-top" alt={dish.name} width={10} height={140}/>
                         </div>
                     </div>
                 ))}
         </div>
     )
-
-    // return (
-    //     <div>
-    //         <div>
-    //             <table className="table">
-    //                 <thead>
-    //                         <tr>
-    //                             <th>Name</th>
-    //                             <th>Cooking time</th>
-    //                             <th>Servings</th>
-    //                             <th>Rating</th>
-    //                         </tr>
-    //                 </thead>
-    //                 <tbody>
-    //                 {
-    //                     dishes.map(
-    //                         dish => (
-    //                             <tr key={dish.id}>
-    //                                 <td>{dish.name}</td>
-    //                                 <td>{dish.cookingTime} min</td>
-    //                                 <td>{dish.servings}</td>
-    //                                 <td>{dish.rating}</td>
-    //                                 <td> <button className="btn btn-warning" 
-    //                                                 onClick={() => getProducts(dish.id)}>Get products</button> </td>
-    //                             </tr>
-    //                         )
-    //                     )
-    //                 }
-    //                 </tbody>
-
-    //             </table>
-        //     </div>
-        // </div>
-    // )
 }
