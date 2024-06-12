@@ -53,20 +53,30 @@ export default function ListDishes() {
     }
 
     return (
-        <div className="card-group row-cols-1 row-cols-md-2 g-4">
-            {dishes.map(
-                dish => (
-                    <div className="col">
-                        <div className="card m-5 p-2 d-flex flex-row justify-content-between align-items-center">
-                            <div className="card-body">
-                                <h5 className="card-title">{dish.name}</h5>
-                                <p className="card-text">{dish.description}</p>
-                                <button className="btn btn-primary" onClick={() => navigateToDishPage(dish.id)}>Details</button>
-                            </div>  
-                            <img src={dish.imageUrl} className="card-img-top" alt={dish.name} width={10} height={140}/>
-                        </div>
-                    </div>
-                ))}
+        <div className="container">
+          <div className="row row-cols-1 row-cols-md-2 g-4">
+            {dishes.map(dish => (
+              <div className="col" key={dish.id}>
+                <div className="card m-5 p-2">
+                  <img 
+                    src={dish.imageUrl} 
+                    className="card-img-top responsive-image" 
+                    alt={dish.name} 
+                  />
+                  <div className="card-body">
+                    <h5 className="card-title">{dish.name}</h5>
+                    <p className="card-text">{dish.description}</p>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => navigateToDishPage(dish.id)}
+                    >
+                      Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-    )
+      );
 }

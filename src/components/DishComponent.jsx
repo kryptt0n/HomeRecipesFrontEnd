@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { addDishApi, retrieveDishById, retrieveProductsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
+import { addDishApi, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -7,8 +7,9 @@ import { useFieldArray, useForm } from "react-hook-form";
 export default function DishComponent() {
     const [dish, setDish] = useState({});
     const [user, setUser] = useState({});
+    const [isOwner, setOwner] = useState(false);
     const auth = useAuth();
-    const username = auth.username;
+    const username = auth?.username;
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -46,6 +47,8 @@ export default function DishComponent() {
             setValue("servings", dish.servings);
             setValue("description", dish.description);
             setValue("products", dish.products || []);
+            setOwner(username !== null && (id === "-1" || username === dish.user?.username));
+            console.log(isOwner);
         }
     }, [dish, setValue, append]);
 
@@ -67,10 +70,11 @@ export default function DishComponent() {
                 })
             console.log(dishData);
             formData.append('dish', JSON.stringify(dishData));
+            console.log(formData);
             addDishApi(formData)
                 .then(response => {
                     console.log(response.data);
-                    // navigate("/myrecipes")
+                    navigate("/myrecipes")
                 })
                 .catch(error => console.log(error));
         }
@@ -84,7 +88,16 @@ export default function DishComponent() {
 
     function retrieveDish(id) {
         retrieveDishById(id)
-            .then(responseDish => setDish(responseDish.data))
+            .then(responseDish => responseDish.data)
+            .then(dish => {
+                const fetchImage = retrieveImageForDish(id).then(foundImage => {
+                    const imageUrl = URL.createObjectURL(foundImage.data);
+                    console.log({ ...dish, imageUrl });
+                    return { ...dish, imageUrl };
+                })
+                return fetchImage;
+            })
+            .then(dishWithImage => setDish(dishWithImage))
             .catch(error => console.log(error));
     }
 
@@ -156,7 +169,12 @@ export default function DishComponent() {
                 <fieldset className="form-group row">
                     <label htmlFor="image" className="col-md-5 col-form-label">Image</label>
                     <div className="col-sm-5">
-                        <input {...register("image", {required: "Image is required"})} type="file" />
+                        {isOwner && <input {...register("image", {required: "Image is required"})} type="file" />}
+                        {!isOwner && <img 
+                    src={dish.imageUrl} 
+                    className="card-img-top responsive-image" 
+                    alt={dish.name} 
+                  />}
                     </div>
                     <small id="imagewarning" className="form-text text-danger">{errors.image?.message}</small>
                 </fieldset>
@@ -166,15 +184,17 @@ export default function DishComponent() {
                     {fields.map((product, index) => (
                         <li className="list-group-item">
                             <input key={product.id} {...register((`products.${index}.value`))} value={product.name} />
-                            <button type="button" className="btn btn-danger btn-sm" onClick={() => removeProduct(index)}>-</button>
+                            {isOwner && <button type="button" className="btn btn-danger btn-sm" onClick={() => removeProduct(index)}>-</button>}
                         </li>
                     ))}
+                    {isOwner &&
                     <li className="list-group-item mb-4">
                         <input type="text" id="newProductName" />
                         <button type="button" onClick={() => addProduct(document.getElementById('newProductName').value)}>+</button>
-                    </li>
+                    </li>}
+                    
                 </ul>
-                <button type="submit" className="btn btn-success">Save</button>
+                {isOwner && <button type="submit" className="btn btn-success">Save</button>}
             </form>
         </div>
     );
