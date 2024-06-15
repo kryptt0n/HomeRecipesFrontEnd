@@ -41,3 +41,7 @@ export function retrieveImageForDish(id) {
         responseType: 'blob'
     })
 }
+
+export function retrieveStepsForDish(id) {
+    return apiClient.get(`/dishes/${id}/steps`);
+}

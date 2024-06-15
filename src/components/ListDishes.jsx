@@ -16,24 +16,32 @@ export default function ListDishes() {
         retrieveDishes()
         .then((response) => {
             const foundDishes = response.data;
-            const fetchImages = foundDishes.map(dish => {
-                return retrieveImageForDish(dish.id)
-                    .then(imageResponse => {
+            console.log("API response data:", foundDishes);
+            console.log(typeof(foundDishes))
+            if (Array.isArray(foundDishes)) {
+                const fetchImages = foundDishes.map(async (dish) => {
+                    try {
+                        const imageResponse = await retrieveImageForDish(dish.id);
                         const imageUrl = URL.createObjectURL(imageResponse.data);
                         console.log({ ...dish, imageUrl });
                         return { ...dish, imageUrl };
-                    });
-            });
-            return Promise.all(fetchImages);
+                    } catch (imageError) {
+                        console.error(`Error fetching image for dish ${dish.id}:`, imageError);
+                        return { ...dish, imageUrl: '' }; // Return the dish with an empty imageUrl on error
+                    }
+                });
+                return Promise.all(fetchImages);
+            } else {
+                throw new Error("Expected an array of dishes");
+            }
         })
-        .then(dishesWithImages => {
+        .then((dishesWithImages) => {
             setDishes(dishesWithImages);
         })
-        .catch((error)=>{
-            console.log(error)
-            setDishes([])
-        }
-        )
+        .catch((error) => {
+            console.error("Error retrieving dishes:", error);
+            setDishes([]);
+        });
     }
 
     function getProducts(id) {

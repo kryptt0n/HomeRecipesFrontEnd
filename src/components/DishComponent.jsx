@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { addDishApi, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
+import { addDishApi, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveStepsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -20,13 +20,19 @@ export default function DishComponent() {
             servings: "",
             description: "",
             image: "",
-            products: []
+            products: [],
+            steps: []
         }
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields: productFields, append: appendProducts, remove: removeProducts } = useFieldArray({
         control,
         name: "products"
+    });
+
+    const { fields: stepFields, append: appendSteps, remove: removeSteps } = useFieldArray({
+        control,
+        name: "steps"
     });
 
     useEffect(() => {
@@ -47,10 +53,10 @@ export default function DishComponent() {
             setValue("servings", dish.servings);
             setValue("description", dish.description);
             setValue("products", dish.products || []);
+            setValue("steps", dish.steps || []);
             setOwner(username !== null && (id === "-1" || username === dish.user?.username));
-            console.log(isOwner);
         }
-    }, [dish, setValue, append]);
+    }, [dish, setValue, appendProducts, appendSteps]);
 
     function updateDish(dishData) {
         dishData.rating = dish.rating;
@@ -111,14 +117,31 @@ export default function DishComponent() {
 
     function addProduct(productName) {
         if (productName) {
-            append({ name: productName });
+            appendProducts({ name: productName });
             document.getElementById('newProductName').value = "";
         }
     }
 
     function removeProduct(index) {
         if (index) {
-            remove(index);
+            removeProducts(index);
+        }
+    }
+
+    function addStep(stepDescription) {
+        if (stepDescription) {
+            appendSteps({ description: stepDescription,
+                            dishId: id});
+            document.getElementById('newStepName').value = "";
+        }
+    }
+
+    function removeStep(index) {
+        if (index) {
+            removeSteps(index);
+            stepFields.forEach((step, index) => {
+                step.stepNumber = index + 1;
+            })
         }
     }
 
@@ -135,7 +158,7 @@ export default function DishComponent() {
             <form onSubmit={handleSubmit(onValid)}>
                 <h3>Description</h3>
                 <fieldset className="form-group row">
-                    <label htmlFor="name" className="col-md-5 col-form-label">Name</label>
+                    <label htmlFor="name" className="col-md-2 col-form-label">Name</label>
                     <div className="col-sm-5">
                         <input {...register("name", { required: "Name is required" })} type="text" />
                     </div>
@@ -143,15 +166,15 @@ export default function DishComponent() {
                 </fieldset>
 
                 <fieldset className="form-group row">
-                    <label htmlFor="cookingTime" className="col-md-5 col-form-label">Cooking time</label>
+                    <label htmlFor="cookingTime" className="col-md-2 col-form-label">Cooking time</label>
                     <div className="col-sm-5">
                         <input {...register("cookingTime", { required: "Cooking time is required" })} type="number" />
                     </div>
                     <small id="cookingtimewarning" className="form-text text-danger">{errors.cookingTime?.message}</small>
                 </fieldset>
 
-                <fieldset className="form-group row mb-5">
-                    <label htmlFor="servings" className="col-md-5 col-form-label mr-9">Servings</label>
+                <fieldset className="form-group row mb-1">
+                    <label htmlFor="servings" className="col-md-2 col-form-label mr-9">Servings</label>
                     <div className="col-sm-5">
                         <input {...register("servings", { required: "Servings are required" })} type="number" />
                     </div>
@@ -159,15 +182,16 @@ export default function DishComponent() {
                 </fieldset>
 
                 <fieldset className="form-group row">
-                    <label htmlFor="description" className="col-md-5 col-form-label">Description</label>
+                    <label htmlFor="description" className="col-md-2 col-form-label">Description</label>
                     <div className="col-sm-5">
-                        <input {...register("description")} type="text" />
+                        {/* <input {...register("description")} type="text" /> */}
+                        <p {...register("description")} contentEditable={isOwner} >{dish.description}</p>
                     </div>
                     <small id="descriptionwarning" className="form-text text-danger">{errors.name?.message}</small>
                 </fieldset>
 
                 <fieldset className="form-group row">
-                    <label htmlFor="image" className="col-md-5 col-form-label">Image</label>
+                    <label htmlFor="image" className="col-md-2 col-form-label">Image</label>
                     <div className="col-sm-5">
                         {isOwner && <input {...register("image", {required: "Image is required"})} type="file" />}
                         {!isOwner && <img 
@@ -179,9 +203,9 @@ export default function DishComponent() {
                     <small id="imagewarning" className="form-text text-danger">{errors.image?.message}</small>
                 </fieldset>
 
-                <h3>Products</h3>
+                <h3>Ingridients</h3>
                 <ul className="list-group list-group-flush">
-                    {fields.map((product, index) => (
+                    {productFields.map((product, index) => (
                         <li className="list-group-item">
                             <input key={product.id} {...register((`products.${index}.value`))} value={product.name} />
                             {isOwner && <button type="button" className="btn btn-danger btn-sm" onClick={() => removeProduct(index)}>-</button>}
@@ -194,6 +218,22 @@ export default function DishComponent() {
                     </li>}
                     
                 </ul>
+
+                <h3>Steps</h3>
+                <ol className="list-group list-group-numbered">
+                    {stepFields.map((step, index) => (
+                        <li className="list-group-item" key={step.stepsId}>
+                            {<p contentEditable={isOwner} {...register((`steps.${index}.description`))}>{step.description}</p>}
+                            {isOwner && <button type="button" className="btn btn-danger btn-sm" onClick={() => removeStep(index)}>-</button>}
+                        </li>
+                    ))}
+                    {isOwner &&
+                    <li className="list-group-item mb-4">
+                        <input type="text" id="newStepName" />
+                        <button type="button" onClick={() => addStep(document.getElementById('newStepName').value)}>+</button>
+                    </li>}
+                    
+                </ol>
                 {isOwner && <button type="submit" className="btn btn-success">Save</button>}
             </form>
         </div>
