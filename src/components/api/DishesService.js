@@ -17,7 +17,11 @@ export function deleteDishApi(id) {
 }
 
 export function updateDishApi(dish) {
-    return apiClient.put(`/dishes`, dish);
+    return apiClient.put(`/dishes`, dish, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
 }
 
 export function addDishApi(dish) {

@@ -58,11 +58,24 @@ export default function DishComponent() {
         }
     }, [dish, setValue, appendProducts, appendSteps]);
 
-    function updateDish(dishData) {
+    async function updateDish(dishData) {
         dishData.rating = dish.rating;
         dishData.user = user;
         if (id !== "-1") {
             dishData.id = dish.id;
+            const formData = new FormData();
+            if (dishData.image && dishData.image.length > 0) {
+                formData.append('image', dishData.image[0]);
+            } else {
+                const oldImage = await convertBlobUrlToFile(dish.imageUrl);
+                formData.append('image', oldImage);
+            }
+            delete dishData.image;
+            dishData.products.map(
+                product => {
+                    delete product.value;
+                });
+            formData.append('dish', JSON.stringify(dishData));
             updateDishApi(dishData)
                 .then(response => navigate("/myrecipes"))
                 .catch(error => console.log(error));
@@ -85,6 +98,13 @@ export default function DishComponent() {
                 .catch(error => console.log(error));
         }
     }
+
+    const convertBlobUrlToFile = async (blobUrl) => {
+        const response = await fetch(blobUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'uploaded-image', { type: blob.type });
+        return file;
+      };
 
     function retrieveUser() {
         retrieveUserByUsernameApi(username)
@@ -193,7 +213,7 @@ export default function DishComponent() {
                 <fieldset className="form-group row">
                     <label htmlFor="image" className="col-md-2 col-form-label">Image</label>
                     <div className="col-sm-5">
-                        {isOwner && <input {...register("image", {required: "Image is required"})} type="file" />}
+                        {isOwner && <input {...register("image", {required: id === -1 ? "Image is required" : false})} type="file" />}
                         {!isOwner && <img 
                     src={dish.imageUrl} 
                     className="card-img-top responsive-image" 
