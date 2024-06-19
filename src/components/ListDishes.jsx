@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
-import { retrieveDishes, retrieveImageForDish, retrieveProductsForDish } from "./api/DishesService";
+import { retrieveDishes, retrieveImageForDish, retrieveProductsForDish, retrieveRatingForDish } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
+import starImg from "../assets/rating_star11.png"
 
 export default function ListDishes() {
 
@@ -22,7 +23,10 @@ export default function ListDishes() {
                 const fetchImages = foundDishes.map(async (dish) => {
                     try {
                         const imageResponse = await retrieveImageForDish(dish.id);
+                        const ratingResponse = await retrieveRatingForDish(dish.id);
                         const imageUrl = URL.createObjectURL(imageResponse.data);
+                        const rating = ratingResponse.data;
+                        dish.rating = rating
                         console.log({ ...dish, imageUrl });
                         return { ...dish, imageUrl };
                     } catch (imageError) {
@@ -74,12 +78,21 @@ export default function ListDishes() {
                   <div className="card-body">
                     <h5 className="card-title">{dish.name}</h5>
                     <p className="card-text">{dish.description}</p>
-                    <button 
-                      className="btn btn-primary" 
-                      onClick={() => navigateToDishPage(dish.id)}
-                    >
-                      Details
-                    </button>
+                    <div className="d-flex flex-row justify-content-between align-items-center">
+                        <button 
+                        className="btn btn-primary" 
+                        onClick={() => navigateToDishPage(dish.id)}
+                        >
+                        Details
+                        </button>
+                        <div className="d-flex flex-row align-items-center justify-content-center">
+                            <img
+                            src={starImg}
+                            alt="star"
+                            className="star-image"/>
+                            <div className="ms-2">{dish.rating}</div>
+                        </div>
+                    </div>
                   </div>
                 </div>
               </div>

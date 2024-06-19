@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
-import { addDishApi, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveStepsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
+import { addDishApi, addRatingForDish, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveRatingForDish, retrieveRatingForDishFromUser, retrieveStepsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import { ReactComponent as EmptyStar} from "../assets/empty_star.svg";
+import { ReactComponent as FillStar} from "../assets/rating_star.svg";
+import { Rating } from "react-simple-star-rating";
+
 export default function DishComponent() {
     const [dish, setDish] = useState({});
     const [user, setUser] = useState({});
+    const [rating, setRating] = useState(1);
     const [isOwner, setOwner] = useState(false);
     const auth = useAuth();
     const username = auth?.username;
+    const isAuthenticated = auth?.isAuthenticated;
+    const [isNewDish, setNewDish] = useState(true);
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -34,17 +41,23 @@ export default function DishComponent() {
         control,
         name: "steps"
     });
+    
+    useEffect(() => {
+        if (username) {
+            retrieveUser();
+        }
+    }, [username]);
 
     useEffect(() => {
         if (id !== "-1") {
             retrieveDish(id);
             retrieveProducts(id);
+            setNewDish(false);
+        } else {
+            setNewDish(true);
         }
-    }, [id]);
+    }, [id, user]);
 
-    useEffect(() => {
-        retrieveUser();
-    }, [username]);
 
     useEffect(() => {
         if (dish) {
@@ -54,6 +67,7 @@ export default function DishComponent() {
             setValue("description", dish.description);
             setValue("products", dish.products || []);
             setValue("steps", dish.steps || []);
+            setRating(dish.rating);
             setOwner(username !== null && (id === "-1" || username === dish.user?.username));
         }
     }, [dish, setValue, appendProducts, appendSteps]);
@@ -76,7 +90,7 @@ export default function DishComponent() {
                     delete product.value;
                 });
             formData.append('dish', JSON.stringify(dishData));
-            updateDishApi(dishData)
+            updateDishApi(formData)
                 .then(response => navigate("/myrecipes"))
                 .catch(error => console.log(error));
         } else {
@@ -112,7 +126,7 @@ export default function DishComponent() {
             .catch(error => console.log(error));
     }
 
-    function retrieveDish(id) {
+    async function retrieveDish(id) {
         retrieveDishById(id)
             .then(responseDish => responseDish.data)
             .then(dish => {
@@ -123,8 +137,36 @@ export default function DishComponent() {
                 })
                 return fetchImage;
             })
+            .then(dish => {
+                let fetchRating = undefined;
+                if (username) {
+                    fetchRating = retrieveRatingForDishFromUser(username, id).then(foundRating => {
+                        const rating = foundRating.data;
+                        console.log({ ...dish, rating });
+                        return { ...dish, rating };
+                    })
+                } else {
+                    fetchRating = retrieveRatingForDish(id).then(foundRating => {
+                        const rating = foundRating.data;
+                        console.log({ ...dish, rating });
+                        return { ...dish, rating };
+                    })
+                }
+                return fetchRating;
+            })
             .then(dishWithImage => setDish(dishWithImage))
             .catch(error => console.log(error));
+    }
+
+    function changedRating(rating) {
+        setRating(rating);
+    }
+
+    function sendRating() {
+        console.log({user: {username: username}, dishId: Number.parseInt(id), rating: rating});
+        addRatingForDish({user: {username: username}, dishId: Number.parseInt(id), rating: rating})
+        .then(response => console.log(response))
+        .catch(error => console.log(error));
     }
 
     function retrieveProducts(id) {
@@ -174,7 +216,7 @@ export default function DishComponent() {
     };
 
     return (
-        <div className="d-flex flex-sm-column justify-content-center align-items-center gap-2">
+        <div className="d-flex flex-sm-column justify-content-center align-items-center gap-2 mb-5">
             <form onSubmit={handleSubmit(onValid)}>
                 <h3>Description</h3>
                 <fieldset className="form-group row">
@@ -214,11 +256,11 @@ export default function DishComponent() {
                     <label htmlFor="image" className="col-md-2 col-form-label">Image</label>
                     <div className="col-sm-5">
                         {isOwner && <input {...register("image", {required: id === -1 ? "Image is required" : false})} type="file" />}
-                        {!isOwner && <img 
+                    <img 
                     src={dish.imageUrl} 
                     className="card-img-top responsive-image" 
                     alt={dish.name} 
-                  />}
+                  />
                     </div>
                     <small id="imagewarning" className="form-text text-danger">{errors.image?.message}</small>
                 </fieldset>
@@ -255,6 +297,12 @@ export default function DishComponent() {
                     
                 </ol>
                 {isOwner && <button type="submit" className="btn btn-success">Save</button>}
+                
+                <h3 className="mt-3">Rating</h3>
+                <div>
+                    <Rating readonly={!isAuthenticated} initialValue={rating} onClick={(val) => changedRating(val)}/>
+                    {isAuthenticated && <button type="button" className="btn btn-warning" onClick={sendRating}>Rate</button>}
+                </div>
             </form>
         </div>
     );

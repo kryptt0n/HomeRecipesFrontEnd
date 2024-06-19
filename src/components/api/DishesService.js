@@ -49,3 +49,15 @@ export function retrieveImageForDish(id) {
 export function retrieveStepsForDish(id) {
     return apiClient.get(`/dishes/${id}/steps`);
 }
+
+export function retrieveRatingForDish(id) {
+    return apiClient.get(`/dishes/${id}/rating`);
+}
+
+export function retrieveRatingForDishFromUser(username, id) {
+    return apiClient.get(`/users/${username}/ratings/${id}`);
+}
+
+export function addRatingForDish(rating) {
+    return apiClient.post(`/users/ratings`, rating);
+}

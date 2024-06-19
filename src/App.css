@@ -59,3 +59,10 @@
   max-height: 220px;
   object-fit: cover; 
 }
+
+.star-image {
+  width: 100%;
+  height: auto;
+  max-height: 25px;
+  object-fit: cover; 
+}

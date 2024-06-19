@@ -18,8 +18,7 @@ export default function Header() {
                         <div className="collapse navbar-collapse">
                             <ul className="navbar-nav">
                                 <li className="nav-item fs-5">
-                                    {isAuth && 
-                                        <Link className="nav-link" to="/recipes">Recipes</Link>}
+                                    <Link className="nav-link" to="/recipes">Recipes</Link>
                                 </li>
                             </ul>
                         </div>
