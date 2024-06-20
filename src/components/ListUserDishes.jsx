@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { deleteDishApi, retrieveDishes, retrieveUserDishes } from "./api/DishesService";
+import { deleteDishApi, retrieveDishes, retrieveRatingForDish, retrieveUserDishes } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -10,12 +10,23 @@ export default function ListUserDishes() {
     const username = auth.username;
     const navigate = useNavigate();
 
-    useEffect(getDishes, [dishes]);
+    useEffect(getDishes, [username]);
 
     function getDishes() {
         retrieveUserDishes(username)
         .then((dishes) => {
-            setDishes(dishes.data)
+            let allDishes = dishes.data;
+            return Promise.all(
+                allDishes.map(async (dish) => {
+                    const ratingResponse = await retrieveRatingForDish(dish.id);
+                    dish.rating = ratingResponse.data;
+                    return dish;
+                })
+            );
+        })
+        .then(allDishes => {
+            console.log(allDishes);
+            setDishes(allDishes);
         })
         .catch((error)=>{
             console.log(error)

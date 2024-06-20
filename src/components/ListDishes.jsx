@@ -17,8 +17,6 @@ export default function ListDishes() {
         retrieveDishes()
         .then((response) => {
             const foundDishes = response.data;
-            console.log("API response data:", foundDishes);
-            console.log(typeof(foundDishes))
             if (Array.isArray(foundDishes)) {
                 const fetchImages = foundDishes.map(async (dish) => {
                     try {
@@ -27,7 +25,6 @@ export default function ListDishes() {
                         const imageUrl = URL.createObjectURL(imageResponse.data);
                         const rating = ratingResponse.data;
                         dish.rating = rating
-                        console.log({ ...dish, imageUrl });
                         return { ...dish, imageUrl };
                     } catch (imageError) {
                         console.error(`Error fetching image for dish ${dish.id}:`, imageError);

@@ -89,6 +89,8 @@ export default function DishComponent() {
                 product => {
                     delete product.value;
                 });
+
+            
             formData.append('dish', JSON.stringify(dishData));
             updateDishApi(formData)
                 .then(response => navigate("/myrecipes"))
@@ -192,8 +194,7 @@ export default function DishComponent() {
 
     function addStep(stepDescription) {
         if (stepDescription) {
-            appendSteps({ description: stepDescription,
-                            dishId: id});
+            appendSteps({ description: stepDescription});
             document.getElementById('newStepName').value = "";
         }
     }
@@ -213,6 +214,10 @@ export default function DishComponent() {
 
     const onSubmit = (data) => {
         updateDish(data);
+    };
+
+    const handleDescriptionChange = (e) => {
+        setValue('description', e.currentTarget.textContent);
     };
 
     return (
@@ -247,7 +252,7 @@ export default function DishComponent() {
                     <label htmlFor="description" className="col-md-2 col-form-label">Description</label>
                     <div className="col-sm-5">
                         {/* <input {...register("description")} type="text" /> */}
-                        <p {...register("description")} contentEditable={isOwner} >{dish.description}</p>
+                        <p {...register("description")} contentEditable={isOwner}  onInput={handleDescriptionChange}>{dish.description}</p>
                     </div>
                     <small id="descriptionwarning" className="form-text text-danger">{errors.name?.message}</small>
                 </fieldset>
@@ -298,11 +303,14 @@ export default function DishComponent() {
                 </ol>
                 {isOwner && <button type="submit" className="btn btn-success">Save</button>}
                 
-                <h3 className="mt-3">Rating</h3>
-                <div>
-                    <Rating readonly={!isAuthenticated} initialValue={rating} onClick={(val) => changedRating(val)}/>
-                    {isAuthenticated && <button type="button" className="btn btn-warning" onClick={sendRating}>Rate</button>}
-                </div>
+                {
+                    !isNewDish &&
+                    <h3 className="mt-3">Rating</h3> &&
+                    <div>
+                        <Rating readonly={!isAuthenticated} initialValue={rating} onClick={(val) => changedRating(val)}/>
+                        {isAuthenticated && <button type="button" className="btn btn-warning" onClick={sendRating}>Rate</button>}
+                    </div>
+                }
             </form>
         </div>
     );

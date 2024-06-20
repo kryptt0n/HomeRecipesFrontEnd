@@ -12,10 +12,11 @@ import SignUp from './SignUp'
 function AuthenticationRoute({children}) {
     const auth = useAuth();
 
-    if (auth.isAuthenticated)
+    if (auth.isAuthenticated) {
         return children;
-
-    return  <Navigate to="/" />
+    } else {
+        return  <Navigate to="/" />
+    }
 }
 
 export default function MainPage() {   
