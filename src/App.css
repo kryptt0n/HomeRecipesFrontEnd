@@ -66,3 +66,13 @@
   max-height: 25px;
   object-fit: cover; 
 }
+
+.growable-textarea {
+  width: 60ch; /* Width for approximately 100 characters */
+  max-width: 100%; /* Prevent overflow beyond container */
+  height: auto; /* Allow height to be auto */
+  min-height: 50px; /* Minimum height to start with */
+  resize: none;
+  overflow-wrap: break-word; /* Break long words to avoid horizontal scrolling */
+  white-space: pre-wrap; /* Preserve white space and line breaks */
+}

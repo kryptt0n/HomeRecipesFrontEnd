@@ -3,6 +3,7 @@ import { addDishApi, addRatingForDish, retrieveDishById, retrieveImageForDish, r
 import { useAuth } from "./AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
+import "../styles/DishComponent.css"
 
 import { ReactComponent as EmptyStar} from "../assets/empty_star.svg";
 import { ReactComponent as FillStar} from "../assets/rating_star.svg";
@@ -208,6 +209,11 @@ export default function DishComponent() {
         }
     }
 
+    function autoResize(textarea) {
+        textarea.style.height = 'auto'; // Reset height
+        textarea.style.height = (textarea.scrollHeight) + 'px'; // Set new height
+    }
+
     const onValid = (data) => {
         onSubmit(data);
     };
@@ -217,49 +223,50 @@ export default function DishComponent() {
     };
 
     const handleDescriptionChange = (e) => {
-        setValue('description', e.currentTarget.textContent);
+        setValue('description', e.target.value);
+        autoResize(e.target);
     };
 
     return (
         <div className="d-flex flex-sm-column justify-content-center align-items-center gap-2 mb-5">
             <form onSubmit={handleSubmit(onValid)}>
                 <h3>Description</h3>
+
                 <fieldset className="form-group row">
                     <label htmlFor="name" className="col-md-2 col-form-label">Name</label>
-                    <div className="col-sm-5">
-                        <input {...register("name", { required: "Name is required" })} type="text" />
+                    <div className="col-md-10">
+                        <input {...register("name", { required: "Name is required" })} type="text" className="form-control"/>
                     </div>
                     <small id="namewarning" className="form-text text-danger">{errors.name?.message}</small>
                 </fieldset>
 
                 <fieldset className="form-group row">
                     <label htmlFor="cookingTime" className="col-md-2 col-form-label">Cooking time</label>
-                    <div className="col-sm-5">
-                        <input {...register("cookingTime", { required: "Cooking time is required" })} type="number" />
+                    <div className="col-md-10">
+                        <input {...register("cookingTime", { required: "Cooking time is required" })} type="number" className="form-control"/>
                     </div>
                     <small id="cookingtimewarning" className="form-text text-danger">{errors.cookingTime?.message}</small>
                 </fieldset>
 
                 <fieldset className="form-group row mb-1">
-                    <label htmlFor="servings" className="col-md-2 col-form-label mr-9">Servings</label>
-                    <div className="col-sm-5">
-                        <input {...register("servings", { required: "Servings are required" })} type="number" />
+                    <label htmlFor="servings" className="col-md-2 col-form-label">Servings</label>
+                    <div className="col-md-10">
+                        <input {...register("servings", { required: "Servings are required" })} type="number" className="form-control"/>
                     </div>
                     <small id="servingswarning" className="form-text text-danger">{errors.servings?.message}</small>
                 </fieldset>
 
                 <fieldset className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description</label>
-                    <div className="col-sm-5">
-                        {/* <input {...register("description")} type="text" /> */}
-                        <p {...register("description")} contentEditable={isOwner}  onInput={handleDescriptionChange}>{dish.description}</p>
+                    <div className="col-md-10">
+                    <textarea className="growable-textarea form-control" {...register("description")} contentEditable={isOwner} 
+                        rows="1" placeholder="Description"  maxLength={1500} onInput={handleDescriptionChange}>{dish.description}</textarea>
                     </div>
-                    <small id="descriptionwarning" className="form-text text-danger">{errors.name?.message}</small>
                 </fieldset>
 
                 <fieldset className="form-group row">
                     <label htmlFor="image" className="col-md-2 col-form-label">Image</label>
-                    <div className="col-sm-5">
+                    <div className="col-md-10">
                         {isOwner && <input {...register("image", {required: id === -1 ? "Image is required" : false})} type="file" />}
                     <img 
                     src={dish.imageUrl} 
@@ -270,46 +277,56 @@ export default function DishComponent() {
                     <small id="imagewarning" className="form-text text-danger">{errors.image?.message}</small>
                 </fieldset>
 
-                <h3>Ingridients</h3>
+                <h3>Ingredients</h3>
                 <ul className="list-group list-group-flush">
                     {productFields.map((product, index) => (
-                        <li className="list-group-item">
-                            <input key={product.id} {...register((`products.${index}.value`))} value={product.name} />
+                        <li className="list-group-item d-flex align-items-center justify-content-between" key={product.id}>
+                            <input 
+                                {...register(`products.${index}.value`)} 
+                                value={product.name} 
+                                className="form-control me-2 flex-grow-1"
+                            />
                             {isOwner && <button type="button" className="btn btn-danger btn-sm" onClick={() => removeProduct(index)}>-</button>}
                         </li>
                     ))}
                     {isOwner &&
-                    <li className="list-group-item mb-4">
-                        <input type="text" id="newProductName" />
-                        <button type="button" onClick={() => addProduct(document.getElementById('newProductName').value)}>+</button>
+                    <li className="list-group-item d-flex align-items-center mb-4">
+                        <input type="text" id="newProductName" className="form-control me-2 flex-grow-1"/>
+                        <button type="button" className="btn btn-primary" onClick={() => addProduct(document.getElementById('newProductName').value)}>+</button>
                     </li>}
-                    
                 </ul>
 
                 <h3>Steps</h3>
                 <ol className="list-group list-group-numbered">
                     {stepFields.map((step, index) => (
-                        <li className="list-group-item" key={step.stepsId}>
-                            {<p contentEditable={isOwner} {...register((`steps.${index}.description`))}>{step.description}</p>}
+                        <li className="list-group-item d-flex align-items-center justify-content-between" key={step.stepsId}>
+                            <p contentEditable={isOwner} {...register(`steps.${index}.description`)} className="flex-grow-1 me-2 mb-0">{step.description}</p>
                             {isOwner && <button type="button" className="btn btn-danger btn-sm" onClick={() => removeStep(index)}>-</button>}
                         </li>
                     ))}
                     {isOwner &&
-                    <li className="list-group-item mb-4">
-                        <input type="text" id="newStepName" />
-                        <button type="button" onClick={() => addStep(document.getElementById('newStepName').value)}>+</button>
+                    <li className="list-group-item d-flex align-items-center mb-4">
+                        <input type="text" id="newStepName" className="form-control me-2 flex-grow-1"/>
+                        <button type="button" className="btn btn-primary" onClick={() => addStep(document.getElementById('newStepName').value)}>+</button>
                     </li>}
-                    
                 </ol>
-                {isOwner && <button type="submit" className="btn btn-success">Save</button>}
+
+                {isOwner && <fieldset className="form-group row">
+                    <div className="col-md-12 text-center">
+                        <button type="submit" className="btn btn-success">Save</button>
+                    </div>
+                </fieldset>}
                 
                 {
                     !isNewDish &&
                     <h3 className="mt-3">Rating</h3> &&
-                    <div>
-                        <Rating readonly={!isAuthenticated} initialValue={rating} onClick={(val) => changedRating(val)}/>
-                        {isAuthenticated && <button type="button" className="btn btn-warning" onClick={sendRating}>Rate</button>}
-                    </div>
+
+                    <fieldset className="form-group row">
+                        <div className="col-md-12 text-center">
+                            <Rating readonly={!isAuthenticated} initialValue={rating} onClick={(val) => changedRating(val)}/>
+                            {isAuthenticated && <button type="button" className="btn btn-warning" onClick={sendRating}>Rate</button>}
+                        </div>
+                    </fieldset>
                 }
             </form>
         </div>

@@ -63,38 +63,41 @@ export default function ListDishes() {
 
     return (
         <div className="container">
-          <div className="row row-cols-1 row-cols-md-2 g-4">
-            {dishes.map(dish => (
-              <div className="col" key={dish.id}>
-                <div className="card m-5 p-2">
-                  <img 
-                    src={dish.imageUrl} 
-                    className="card-img-top responsive-image" 
-                    alt={dish.name} 
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">{dish.name}</h5>
-                    <p className="card-text">{dish.description}</p>
-                    <div className="d-flex flex-row justify-content-between align-items-center">
+            <div className="row row-cols-1 row-cols-md-2 g-4">
+                {dishes.map(dish => (
+                <div className="col" key={dish.id}>
+                    <div className="card m-3 p-2">
+                    <img 
+                        src={dish.imageUrl} 
+                        className="card-img-top responsive-image" 
+                        alt={dish.name} 
+                    />
+                    <div className="card-body">
+                        <h5 className="card-title">{dish.name}</h5>
+                        <p className="card-text">{dish.description}</p>
+                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
                         <button 
-                        className="btn btn-primary" 
-                        onClick={() => navigateToDishPage(dish.id)}
+                            className="btn btn-primary mb-2 mb-md-0" 
+                            onClick={() => navigateToDishPage(dish.id)}
                         >
-                        Details
+                            Details
                         </button>
                         <div className="d-flex flex-row align-items-center justify-content-center">
                             <img
                             src={starImg}
                             alt="star"
-                            className="star-image"/>
+                            className="star-image"
+                            style={{ width: '20px', height: '20px' }} 
+                            />
                             <div className="ms-2">{dish.rating}</div>
                         </div>
+                        </div>
                     </div>
-                  </div>
+                    </div>
                 </div>
-              </div>
-            ))}
-          </div>
+                ))}
+            </div>
         </div>
+
       );
 }

@@ -1,0 +1,32 @@
+@media (max-width: 576px) {
+    .form-group.row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .col-form-label {
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .list-group-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .list-group-item .btn {
+        margin-top: 0.5rem;
+        width: 100%;
+    }
+
+    .list-group-item .form-control {
+        width: 100%;
+    }
+}
