@@ -2,6 +2,6 @@ import axios from 'axios'
 
 export const apiClient = axios.create(
     {
-        baseURL: 'http://localhost:8080/api'
+        baseURL: 'http://107.20.240.135:8080/api'
     }
 );

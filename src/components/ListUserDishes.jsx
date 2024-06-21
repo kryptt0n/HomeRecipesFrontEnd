@@ -58,38 +58,51 @@ export default function ListUserDishes() {
 
     return (
         <div>
-            <div>
-                <table className="table">
+            <div className="table-responsive">
+                <table className="table table-striped">
                     <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Cooking time</th>
-                                <th>Servings</th>
-                                <th>Rating</th>
-                            </tr>
+                        <tr>
+                            <th>Name</th>
+                            <th>Cooking time</th>
+                            <th>Servings</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {
-                        dishes.map(
-                            dish => (
-                                <tr key={dish.id}>
-                                    <td>{dish.name}</td>
-                                    <td>{dish.cookingTime} min</td>
-                                    <td>{dish.servings}</td>
-                                    <td>{dish.rating}</td>
-                                    <td> <button className="btn btn-warning" 
-                                                    onClick={() => deleteDish(dish.id)}>Delete</button> </td>
-                                    <td> <button className="btn btn-success" 
-                                                    onClick={() => updateDish(dish.id)}>Update</button> </td>
-                                </tr>
+                        {
+                            dishes.map(
+                                dish => (
+                                    <tr key={dish.id}>
+                                        <td>{dish.name}</td>
+                                        <td>{dish.cookingTime} min</td>
+                                        <td>{dish.servings}</td>
+                                        <td>{dish.rating}</td>
+                                        <td>
+                                            <div className="d-flex flex-column flex-md-row">
+                                                <button 
+                                                    className="btn btn-warning mb-2 mb-md-0 me-md-2" 
+                                                    onClick={() => deleteDish(dish.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                                <button 
+                                                    className="btn btn-success" 
+                                                    onClick={() => updateDish(dish.id)}
+                                                >
+                                                    Update
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
                             )
-                        )
-                    }
+                        }
                     </tbody>
-
                 </table>
             </div>
-            <div className="btn btn-success m-5" onClick={addDish}>New Dish</div>
+            <div className="btn btn-success" onClick={addDish}>New Dish</div>
         </div>
-    )
+    );
+    
 }

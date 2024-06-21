@@ -36,22 +36,43 @@ export default function Login() {
     }
 
     return (
-        <div className="Login">
-        {showSuccessMesage && <div className='successMessage'>Login successful!</div>}
-        {showErrorMesage && <div className='errorMessage'>Login failed. Check credentials</div>}
-        <div className="LoginForm">
-            <div>
-                <label>User name</label>
-                <input type="text" name="username" value={username} onChange={onUsernameChange}></input>
-            </div>
-            <div>
-                <label>Password</label>
-                <input type="password" name="password" value={password} onChange={onPasswordChange}></input>
-            </div>
-            <div>
-                <button type="button" name="login" onClick={handleSubmit}>Login</button>
+        <div className="container">
+            {showSuccessMesage && <div className="alert alert-success">Login successful!</div>}
+            {showErrorMesage && <div className="alert alert-danger">Login failed. Check credentials</div>}
+            <div className="row justify-content-center">
+                <div className="col-12 col-md-6 col-lg-4">
+                    <div className="mb-3">
+                        <label className="form-label">User name</label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            name="username" 
+                            value={username} 
+                            onChange={onUsernameChange} 
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            className="form-control" 
+                            name="password" 
+                            value={password} 
+                            onChange={onPasswordChange} 
+                        />
+                    </div>
+                    <div className="d-grid">
+                        <button 
+                            type="button" 
+                            className="btn btn-primary" 
+                            name="login" 
+                            onClick={handleSubmit}
+                        >
+                            Login
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    )
+    );    
 }

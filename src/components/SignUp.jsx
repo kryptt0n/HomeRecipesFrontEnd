@@ -55,40 +55,46 @@ export default function SignUp() {
 
 
     return (
-        <Formik initialValues={{
-            username: "",
-            password: "",
-            email: ""
-        }}
-        validate={validate}
-        validateOnChange={false}
-        onSubmit={(credentials) => signUpUser(credentials)}
+        <Formik
+            initialValues={{
+                username: "",
+                password: "",
+                email: ""
+            }}
+            validate={validate}
+            validateOnChange={false}
+            onSubmit={(credentials) => signUpUser(credentials)}
         >
             <Form>
-                <div className="d-flex flex-sm-column justify-content-center align-items-center gap-2">
-                    <fieldset>
-                        <label htmlFor="username">Username</label>
-                        <Field name="username" type="text" />
-                        <ErrorMessage name="username" render={msg => <div className="text-danger">{msg}</div>}/>
-                    </fieldset>
-
-                    <fieldset>
-                        <label htmlFor="password">Password</label>
-                        <Field name="password" type="text" />
-                        <ErrorMessage name="password" render={msg => <div className="text-danger">{msg}</div>}/>
-                    </fieldset>
-
-                    <fieldset>
-                        <label htmlFor="email">Email</label>
-                        <Field name="email" type="email" />
-                        <ErrorMessage name="email" render={msg => <div className="text-danger">{msg}</div>}/>
-                    </fieldset>
-
-                    <button type="submit">Save</button>
+                <div className="container">
+                    <div className="row justify-content-center">
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <fieldset className="mb-3">
+                                <label htmlFor="username" className="form-label">Username</label>
+                                <Field name="username" type="text" className="form-control" />
+                                <ErrorMessage name="username" render={msg => <div className="text-danger">{msg}</div>} />
+                            </fieldset>
+    
+                            <fieldset className="mb-3">
+                                <label htmlFor="password" className="form-label">Password</label>
+                                <Field name="password" type="password" className="form-control" />
+                                <ErrorMessage name="password" render={msg => <div className="text-danger">{msg}</div>} />
+                            </fieldset>
+    
+                            <fieldset className="mb-3">
+                                <label htmlFor="email" className="form-label">Email</label>
+                                <Field name="email" type="email" className="form-control" />
+                                <ErrorMessage name="email" render={msg => <div className="text-danger">{msg}</div>} />
+                            </fieldset>
+    
+                            <div className="d-grid">
+                                <button type="submit" className="btn btn-primary">Sign up</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </Form>
-           
-        
         </Formik>
-    )
+    );
+    
 }
