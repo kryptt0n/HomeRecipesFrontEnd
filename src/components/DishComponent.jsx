@@ -70,12 +70,14 @@ export default function DishComponent() {
             setValue("steps", dish.steps || []);
             setRating(dish.rating);
             setOwner(username !== null && (id === "-1" || username === dish.user?.username));
+            autoResize(document.getElementsByTagName("textarea")[0])
         }
     }, [dish, setValue, appendProducts, appendSteps]);
 
     async function updateDish(dishData) {
         dishData.rating = dish.rating;
         dishData.user = user;
+        console.log(dishData);
         if (id !== "-1") {
             dishData.id = dish.id;
             const formData = new FormData();
@@ -135,7 +137,6 @@ export default function DishComponent() {
             .then(dish => {
                 const fetchImage = retrieveImageForDish(id).then(foundImage => {
                     const imageUrl = URL.createObjectURL(foundImage.data);
-                    console.log({ ...dish, imageUrl });
                     return { ...dish, imageUrl };
                 })
                 return fetchImage;
@@ -151,7 +152,6 @@ export default function DishComponent() {
                 } else {
                     fetchRating = retrieveRatingForDish(id).then(foundRating => {
                         const rating = foundRating.data;
-                        console.log({ ...dish, rating });
                         return { ...dish, rating };
                     })
                 }
@@ -188,8 +188,10 @@ export default function DishComponent() {
     }
 
     function removeProduct(index) {
-        if (index) {
+        console.log(productFields);
+        if (index || index === 0) {
             removeProducts(index);
+            console.log(productFields)
         }
     }
 
@@ -201,7 +203,7 @@ export default function DishComponent() {
     }
 
     function removeStep(index) {
-        if (index) {
+        if (index || index === 0) {
             removeSteps(index);
             stepFields.forEach((step, index) => {
                 step.stepNumber = index + 1;
@@ -210,8 +212,8 @@ export default function DishComponent() {
     }
 
     function autoResize(textarea) {
-        textarea.style.height = 'auto'; // Reset height
-        textarea.style.height = (textarea.scrollHeight) + 'px'; // Set new height
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
     }
 
     const onValid = (data) => {
@@ -235,7 +237,10 @@ export default function DishComponent() {
                 <fieldset className="form-group row">
                     <label htmlFor="name" className="col-md-2 col-form-label">Name</label>
                     <div className="col-md-10">
-                        <input {...register("name", { required: "Name is required" })} type="text" className="form-control"/>
+                        <input {...register("name", { required: "Name is required" })} 
+                        type="text" 
+                        className="form-control" 
+                        readOnly={!isOwner}/>
                     </div>
                     <small id="namewarning" className="form-text text-danger">{errors.name?.message}</small>
                 </fieldset>
@@ -243,7 +248,10 @@ export default function DishComponent() {
                 <fieldset className="form-group row">
                     <label htmlFor="cookingTime" className="col-md-2 col-form-label">Cooking time</label>
                     <div className="col-md-10">
-                        <input {...register("cookingTime", { required: "Cooking time is required" })} type="number" className="form-control"/>
+                        <input {...register("cookingTime", { required: "Cooking time is required" })} 
+                        type="number" 
+                        className="form-control"
+                        readOnly={!isOwner}/>
                     </div>
                     <small id="cookingtimewarning" className="form-text text-danger">{errors.cookingTime?.message}</small>
                 </fieldset>
@@ -251,7 +259,10 @@ export default function DishComponent() {
                 <fieldset className="form-group row mb-1">
                     <label htmlFor="servings" className="col-md-2 col-form-label">Servings</label>
                     <div className="col-md-10">
-                        <input {...register("servings", { required: "Servings are required" })} type="number" className="form-control"/>
+                        <input {...register("servings", { required: "Servings are required" })} 
+                        type="number" 
+                        className="form-control"
+                        readOnly={!isOwner}/>
                     </div>
                     <small id="servingswarning" className="form-text text-danger">{errors.servings?.message}</small>
                 </fieldset>
@@ -259,8 +270,17 @@ export default function DishComponent() {
                 <fieldset className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description</label>
                     <div className="col-md-10">
-                    <textarea className="growable-textarea form-control" {...register("description")} contentEditable={isOwner} 
-                        rows="1" placeholder="Description"  maxLength={1500} onInput={handleDescriptionChange}>{dish.description}</textarea>
+                        <textarea 
+                            className="growable-textarea form-control" 
+                            {...register("description")} 
+                            contentEditable={isOwner} 
+                            rows="1" 
+                            placeholder="Description"  
+                            maxLength={1500} 
+                            onInput={handleDescriptionChange}
+                            readOnly={!isOwner}
+                            >{dish.description}
+                        </textarea>
                     </div>
                 </fieldset>
 
@@ -282,9 +302,10 @@ export default function DishComponent() {
                     {productFields.map((product, index) => (
                         <li className="list-group-item d-flex align-items-center justify-content-between" key={product.id}>
                             <input 
-                                {...register(`products.${index}.value`)} 
-                                value={product.name} 
+                                {...register(`products.${index}.name`)} 
+                                defaultValue={product.name} 
                                 className="form-control me-2 flex-grow-1"
+                                readOnly={!isOwner}
                             />
                             {isOwner && <button type="button" className="btn btn-danger btn-sm" onClick={() => removeProduct(index)}>-</button>}
                         </li>

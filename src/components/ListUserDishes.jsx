@@ -25,7 +25,6 @@ export default function ListUserDishes() {
             );
         })
         .then(allDishes => {
-            console.log(allDishes);
             setDishes(allDishes);
         })
         .catch((error)=>{
