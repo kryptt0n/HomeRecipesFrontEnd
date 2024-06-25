@@ -8,6 +8,7 @@ import "../styles/DishComponent.css"
 import { ReactComponent as EmptyStar} from "../assets/empty_star.svg";
 import { ReactComponent as FillStar} from "../assets/rating_star.svg";
 import { Rating } from "react-simple-star-rating";
+import { Comment, CommentAction, CommentActions, CommentAuthor, CommentGroup, CommentMetadata, CommentText, CommentContent, Header } from "semantic-ui-react";
 
 export default function DishComponent() {
     const [dish, setDish] = useState({});
@@ -29,7 +30,8 @@ export default function DishComponent() {
             description: "",
             image: "",
             products: [],
-            steps: []
+            steps: [],
+            comments: []
         }
     });
 
@@ -41,6 +43,11 @@ export default function DishComponent() {
     const { fields: stepFields, append: appendSteps, remove: removeSteps } = useFieldArray({
         control,
         name: "steps"
+    });
+
+    const { fields: commentFields, append: appendComment, remove: removeComment } = useFieldArray({
+        control,
+        name: "comments"
     });
     
     useEffect(() => {
@@ -68,9 +75,19 @@ export default function DishComponent() {
             setValue("description", dish.description);
             setValue("products", dish.products || []);
             setValue("steps", dish.steps || []);
+            setValue("comments", dish.comments || [])
             setRating(dish.rating);
             setOwner(username !== null && (id === "-1" || username === dish.user?.username));
             autoResize(document.getElementsByTagName("textarea")[0])
+            if (dish && dish.comments && dish.comments.length > 0) {
+                for (let index = 0; index < dish.comments.length; index++) {
+                    const element = dish.comments[index];
+                    const comment = dish.comments[index];
+                    console.log(comment.user);
+                    
+                }
+
+            }
         }
     }, [dish, setValue, appendProducts, appendSteps]);
 
@@ -337,6 +354,28 @@ export default function DishComponent() {
                         <button type="submit" className="btn btn-success">Save</button>
                     </div>
                 </fieldset>}
+
+                <CommentGroup threaded>
+                <Header as='h3' dividing>
+                    Comments
+                </Header>
+                    {commentFields.map((comment, index) => (
+                        <Comment>
+                            <CommentContent>
+                                {comment.user && <CommentAuthor>{comment.user.username}</CommentAuthor>}
+                                {!comment.user && <CommentAuthor>Anonymous</CommentAuthor>}
+                                <CommentMetadata>
+                                    <div>{(new Date(...comment.postedDate)).toDateString()}</div>
+                                </CommentMetadata>
+                                <CommentText>
+                                    <p>
+                                        {comment.comment}
+                                    </p>
+                                </CommentText>
+                            </CommentContent>
+                        </Comment>
+                    ))}
+                </CommentGroup>
                 
                 {
                     !isNewDish &&
