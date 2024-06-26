@@ -61,3 +61,11 @@ export function retrieveRatingForDishFromUser(username, id) {
 export function addRatingForDish(rating) {
     return apiClient.post(`/users/ratings`, rating);
 }
+
+export function retrieveCommentsForDish(id) {
+    return apiClient.get(`/dishes/${id}/comments`);
+}
+
+export function addCommentForDish(comment) {
+    return apiClient.post(`/dishes/comments`, comment);
+}

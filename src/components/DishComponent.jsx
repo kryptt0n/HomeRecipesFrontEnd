@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { addDishApi, addRatingForDish, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveRatingForDish, retrieveRatingForDishFromUser, retrieveStepsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
+import { addCommentForDish, addDishApi, addRatingForDish, retrieveCommentsForDish, retrieveDishById, retrieveImageForDish, retrieveProductsForDish, retrieveRatingForDish, retrieveRatingForDishFromUser, retrieveStepsForDish, retrieveUserByUsernameApi, updateDishApi } from "./api/DishesService";
 import { useAuth } from "./AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -8,7 +8,8 @@ import "../styles/DishComponent.css"
 import { ReactComponent as EmptyStar} from "../assets/empty_star.svg";
 import { ReactComponent as FillStar} from "../assets/rating_star.svg";
 import { Rating } from "react-simple-star-rating";
-import { Comment, CommentAction, CommentActions, CommentAuthor, CommentGroup, CommentMetadata, CommentText, CommentContent, Header } from "semantic-ui-react";
+import { Comment, CommentAction, CommentActions, CommentAuthor, CommentGroup, 
+    CommentMetadata, CommentText, CommentContent, Header, Form, FormTextArea, Button } from "semantic-ui-react";
 
 export default function DishComponent() {
     const [dish, setDish] = useState({});
@@ -75,19 +76,17 @@ export default function DishComponent() {
             setValue("description", dish.description);
             setValue("products", dish.products || []);
             setValue("steps", dish.steps || []);
-            setValue("comments", dish.comments || [])
             setRating(dish.rating);
             setOwner(username !== null && (id === "-1" || username === dish.user?.username));
             autoResize(document.getElementsByTagName("textarea")[0])
             if (dish && dish.comments && dish.comments.length > 0) {
                 for (let index = 0; index < dish.comments.length; index++) {
-                    const element = dish.comments[index];
                     const comment = dish.comments[index];
-                    console.log(comment.user);
-                    
+                    comment.postedDate = new Date(...comment.postedDate).toLocaleDateString();
+                    console.log(comment.postedDate);
                 }
-
             }
+            setValue("comments", dish.comments || [])
         }
     }, [dish, setValue, appendProducts, appendSteps]);
 
@@ -146,6 +145,12 @@ export default function DishComponent() {
         retrieveUserByUsernameApi(username)
             .then(response => setUser(response.data))
             .catch(error => console.log(error));
+    }
+
+    function retrieveComments() {
+        retrieveCommentsForDish(id)
+        .then(response => setValue("comments", response.data || []))
+        .catch(error => console.log(error));
     }
 
     async function retrieveDish(id) {
@@ -240,6 +245,26 @@ export default function DishComponent() {
     const onSubmit = (data) => {
         updateDish(data);
     };
+
+    const createComment = (data) => {
+        const comment = document.getElementById("newComment").value;
+        const user = isAuthenticated ? { username: username } : null
+        const date = new Date();
+        const postedDate = date.toISOString();
+        const toDisplayDate = date.toLocaleDateString();
+        const dish = {id: id}
+        const newComment = {comment, user, postedDate, dish};
+        addCommentForDish(newComment)
+        .then( response => {
+            newComment.postedDate = toDisplayDate;
+            appendComment(newComment);
+            document.getElementById('newComment').value = "";
+        }
+        )
+        .catch(error => {
+            console.log(error);
+        })
+    }
 
     const handleDescriptionChange = (e) => {
         setValue('description', e.target.value);
@@ -365,7 +390,7 @@ export default function DishComponent() {
                                 {comment.user && <CommentAuthor>{comment.user.username}</CommentAuthor>}
                                 {!comment.user && <CommentAuthor>Anonymous</CommentAuthor>}
                                 <CommentMetadata>
-                                    <div>{(new Date(...comment.postedDate)).toDateString()}</div>
+                                    <div>{comment.postedDate}</div>
                                 </CommentMetadata>
                                 <CommentText>
                                     <p>
@@ -375,6 +400,11 @@ export default function DishComponent() {
                             </CommentContent>
                         </Comment>
                     ))}
+
+                    <Form reply>
+                        <FormTextArea id="newComment"/>
+                        <Button content='Add Comment' type="button" labelPosition='left' icon='edit' primary onClick={createComment}/>
+                    </Form>
                 </CommentGroup>
                 
                 {
