@@ -10,6 +10,7 @@ import { ReactComponent as FillStar} from "../assets/rating_star.svg";
 import { Rating } from "react-simple-star-rating";
 import { Comment, CommentAction, CommentActions, CommentAuthor, CommentGroup, 
     CommentMetadata, CommentText, CommentContent, Header, Form, FormTextArea, Button } from "semantic-ui-react";
+import CommentSection from "./CommentsSection";
 
 export default function DishComponent() {
     const [dish, setDish] = useState({});
@@ -380,7 +381,9 @@ export default function DishComponent() {
                     </div>
                 </fieldset>}
 
-                <CommentGroup threaded>
+                <CommentSection commentFields={commentFields} createComment={createComment} />
+
+                {/* <CommentGroup threaded>
                 <Header as='h3' dividing>
                     Comments
                 </Header>
@@ -405,7 +408,7 @@ export default function DishComponent() {
                         <FormTextArea id="newComment"/>
                         <Button content='Add Comment' type="button" labelPosition='left' icon='edit' primary onClick={createComment}/>
                     </Form>
-                </CommentGroup>
+                </CommentGroup> */}
                 
                 {
                     !isNewDish &&
