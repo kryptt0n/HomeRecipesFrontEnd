@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { authenticate } from "./api/Authentication";
+import { authenticate, getJwtToken } from "./api/Authentication";
 import axios from "axios";
 import { apiClient } from "./api/ApiClient";
 
@@ -20,6 +20,8 @@ export default function AuthProvider({children}) {
     async function login(user, pwd) {
         const userToken = "Basic " + btoa(user + ":" + pwd);
         try {
+            const jwtResult = await getJwtToken(userToken);
+            console.log(jwtResult.data);
             const result = await authenticate(userToken);
             if (result.status == 200) {
                 setAuthenticated(true);

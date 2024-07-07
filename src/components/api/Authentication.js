@@ -9,6 +9,14 @@ export function authenticate(token) {
     })
 }
 
+export function getJwtToken(token) {
+    return apiClient.post("/auth-jwt", {
+        headers: {
+            Authorization: token
+        }
+    })
+}
+
 export async function encodeSHA256(value) {
     return sha256(value);
 }
